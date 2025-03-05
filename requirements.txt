@@ -1,0 +1,6 @@
+folium==0.19.5
+jupyter==1.1.1
+matplotlib==3.10.1
+numpy==2.2.3
+pandas==2.2.3
+requests==2.32.3
