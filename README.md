@@ -2,7 +2,7 @@
 
 A deep dive into my Uber driving history to uncover earnings trends, peak hours, tip behavior, and optimal driving strategies using Python, pandas, and data visualization.
 
-I worked as an Uber driver in Chicago between January 2023 and September 2024, during which I completed approximately 4300 passenger rides. 
+I worked as an Uber driver in Chicago between January 2023 and September 2024, during which I completed approximately 2152 passenger rides. Of these, 2151 have a zipcode present for both pickup and dropoff destinations, so this analysis will be limited to that subset.
 
 ## Key Findings
 
