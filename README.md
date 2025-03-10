@@ -2,22 +2,14 @@
 
 A deep dive into my Uber driving history to uncover earnings trends, peak hours, tip behavior, and optimal driving strategies using Python, pandas, and data visualization.
 
-## 4️⃣3️⃣0️⃣0️⃣ 
-![Ride Count per Week chart](visualizations/Ride_Count_per_Week.png)
-I worked as an Uber driver in Chicago between January 2023 and September 2024, during which I completed almost 4300 passenger rides.
+![Ride Count per Week chart - I worked as an Uber driver in Chicago between January 2023 and September 2024, during which I completed 4573 passenger rides.](visualizations/Ride_Count_per_Week.png)
 
-## 🚙🚐🐶🤹🏻‍♂️ 
-![Ride Count by Ride Type chart](visualizations/Uber_Rides_by_Type.png)
-I did a variety of Uber ride types including UberX, UberX Share, UberXL, Comfort, Business Comfort, Uber Pet, and UberX Priority.
+![Ride Count by Ride Type chart - I did a variety of Uber ride types including UberX, UberX Share, UberXL, Comfort, Business Comfort, Uber Pet, and UberX Priority.](visualizations/Uber_Rides_by_Type.png)
 
-## 🌇🏙️🌆🌃 
-![Ride Count by Hour of the Day chart](visualizations/Ride_Count_by_Hour.png)
-![Ride Count by Day of Week chart](visualizations/Ride_Count_by_Day_of_Week.png)
-I drove at almost all hours of the day and night and I worked 7 days a week.
-
-## 🥳🪅🎸🌭 
-![Ride Count by ZIP code folium map](visualizations/Rides_by_ZIP_Folium_Heatmap.png)
-I drove during the busiest festivals and city events, downtown along with almost all other neighborhoods of Chicago.
+![Ride Count by Hour of the Day chart - I drove at almost all hours of the day and night](visualizations/Ride_Count_by_Hour.png)
+![Ride Count by Day of Week chart - I worked 7 days a week](visualizations/Ride_Count_by_Day_of_Week.png)
+ 
+![Ride Count by ZIP code folium map - I drove downtown along with almost all other neighborhoods of Chicago](visualizations/Rides_by_ZIP_Folium_Heatmap.png)
 
 ## ☀️⛈️🌪️❄️
 I drove in every kind of weather, from the coldest deep freeze in Chicago to the days above 100 F, from droughts to torrential rainstorms to blinding blizzards. 
