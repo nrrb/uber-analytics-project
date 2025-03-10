@@ -8,7 +8,8 @@ A deep dive into my Uber driving history to uncover earnings trends, peak hours,
 
 ![Ride Count by Hour of the Day chart - I drove at almost all hours of the day and night](visualizations/Ride_Count_by_Hour.png)
 ![Ride Count by Day of Week chart - I worked 7 days a week](visualizations/Ride_Count_by_Day_of_Week.png)
- 
+
+[Interactive map](https://nrrb.github.io/uber-analytics-project/chicago_map.html) made with [Folium](https://python-visualization.github.io/folium/latest/#).
 ![Ride Count by ZIP code folium map - I drove downtown along with almost all other neighborhoods of Chicago](visualizations/Rides_by_ZIP_Folium_Heatmap.png)
 
 ## ☀️⛈️🌪️❄️
