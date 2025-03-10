@@ -14,6 +14,9 @@ I drove at almost all hours of the day and night and I worked 7 days a week.
 ## 🥳🪅🎸🌭 
 I drove during the busiest festivals and city events, downtown along with almost all other neighborhoods of Chicago.
 
+## ☀️⛈️🌪️❄️
+I drove in every kind of weather, from the coldest deep freeze in Chicago to the days above 100 F, from droughts to torrential rainstorms to blinding blizzards. 
+
 ## ⭐️⭐️⭐️⭐️⭐️ 
 By the end I had an average rating of 4.98 stars (calculated on the previous 500 rides). Most of the time I was averaging 5.00 stars. 
 
