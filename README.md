@@ -2,11 +2,11 @@
 
 A deep dive into my Uber driving history to uncover earnings trends, peak hours, tip behavior, and optimal driving strategies using Python, pandas, and data visualization.
 
-⭐️ I worked as an Uber driver in Chicago between January 2023 and September 2024, during which I completed almost 4300 passenger rides.
-⭐️ I did a variety of Uber ride types including UberX, UberX Share, UberXL, Comfort, Business Comfort, Uber Pet, and UberX Priority.
-⭐️ I drove at almost all hours of the day and night and I worked 7 days a week.
-⭐️ I drove during the busiest festivals and city events, downtown along with almost all other neighborhoods of Chicago.
-⭐️ By the end I had an average rating of 4.98 stars (calculated on the previous 500 rides).
+- ⭐️ I worked as an Uber driver in Chicago between January 2023 and September 2024, during which I completed almost 4300 passenger rides.
+- ⭐️ I did a variety of Uber ride types including UberX, UberX Share, UberXL, Comfort, Business Comfort, Uber Pet, and UberX Priority.
+- ⭐️ I drove at almost all hours of the day and night and I worked 7 days a week.
+- ⭐️ I drove during the busiest festivals and city events, downtown along with almost all other neighborhoods of Chicago.
+- ⭐️ By the end I had an average rating of 4.98 stars (calculated on the previous 500 rides).
 
 ## Key Findings
 
