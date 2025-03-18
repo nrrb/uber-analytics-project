@@ -29,5 +29,7 @@ for i in range(0, len(track_uris), batch_size):
 
 # Save track metadata to CSV
 df_tracks = pd.json_normalize(tracks_metadata)
-df_tracks.to_csv('../data/tracks_metadata.csv', index=False)
-print("Track metadata saved to 'tracks_metadata.csv'.")
+#df_tracks.to_csv('../data/tracks_metadata.csv', index=False)
+df_tracks.to_parquet('../data/tracks_metadata.parquet', index=False)
+#print("Track metadata saved to 'tracks_metadata.csv'.")
+print("Track metadata saved to 'tracks_metadata.parquet'.")
