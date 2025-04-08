@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Route Animation</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1;
+      background: white;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      font-family: sans-serif;
+    }
+    label, select, input { display: block; margin-bottom: 6px; width: 100%; }
+    #status { margin-top: 10px; font-weight: bold; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="controls">
+  <label for="daySelect">Select Day</label>
+  <select id="daySelect"></select>
+
+  <label for="speedRange">Animation Speed</label>
+  <input type="range" id="speedRange" min="10" max="500" step="10" value="300">
+
+  <button onclick="startAnimation()">Start</button>
+  <button onclick="pauseAnimation()">Pause</button>
+  <button onclick="resumeAnimation()">Resume</button>
+
+  <div id="status">
+    Trip #: <span id="timestampDisplay">–</span>
+  </div>
+</div>
+
+<script src="days.js"></script>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoibmljaG9sYXM3NzciLCJhIjoiY202NW40cHpnMXJmODJpcHlvZHVjZDA5ZiJ9.HoZYIgpxoOkZEM7Fb9_Lsw';
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v11',
+  center: [-87.65, 41.9],
+  zoom: 11
+});
+
+let marker = null;
+let animationCoords = [];
+let animationIndex = 0;
+let animationFrameId = null;
+let paused = false;
+let speed = 300;
+let startEndMarkers = [];
+let timestamps = [];
+
+const daySelect = document.getElementById("daySelect");
+const speedRange = document.getElementById("speedRange");
+const timestampDisplay = document.getElementById("timestampDisplay");
+
+speedRange.addEventListener("input", () => {
+  speed = 510 - parseInt(speedRange.value);
+speedRange.value = 500;
+});
+
+async function loadAvailableDays() {
+  daySelect.innerHTML = days.map(day => `<option value="${day}">${day}</option>`).join('');
+}
+
+async function loadGeoJSON(day) {
+  const response = await fetch(`output/geojson/cleaned/${day}.geojson`);
+  const geojson = await response.json();
+  const coords = [];
+  timestamps = [];
+  geojson.features.forEach((f, i) => {
+    if (f.geometry.type === "LineString") {
+      const t = f.properties?.timestamp || `Trip ${i + 1}`;
+      f.geometry.coordinates.forEach(c => timestamps.push(t));
+      coords.push(...f.geometry.coordinates);
+    }
+  });
+  return coords;
+}
+
+function addStartEndMarkers(geojson) {
+  startEndMarkers.forEach(m => m.remove());
+  startEndMarkers = [];
+
+  geojson.features.forEach(f => {
+    if (f.geometry.type === "LineString") {
+      const coords = f.geometry.coordinates;
+      if (coords.length >= 2) {
+        const start = new mapboxgl.Marker({ color: 'green' })
+          .setLngLat(coords[0])
+          .addTo(map);
+        const end = new mapboxgl.Marker({ color: 'red' })
+          .setLngLat(coords[coords.length - 1])
+          .addTo(map);
+        startEndMarkers.push(start, end);
+      }
+    }
+  });
+}
+
+function startAnimation() {
+  cancelAnimationFrame(animationFrameId);
+  if (marker) marker.remove();
+  animationIndex = 0;
+  paused = false;
+  const selectedDay = daySelect.value;
+
+  fetch(`output/geojson/cleaned/${selectedDay}.geojson`)
+    .then(resp => resp.json())
+    .then(geojson => {
+      addStartEndMarkers(geojson);
+      const coords = [];
+      timestamps = [];
+      geojson.features.forEach((f, i) => {
+        if (f.geometry.type === "LineString") {
+          const t = f.properties?.timestamp || `Trip ${i + 1}`;
+          f.geometry.coordinates.forEach(c => timestamps.push(t));
+          coords.push(...f.geometry.coordinates);
+        }
+      });
+      animationCoords = coords;
+
+      if (!animationCoords.length) return;
+
+      const carEl = document.createElement('div');
+carEl.textContent = '🚗';
+carEl.style.fontSize = '24px';
+marker = new mapboxgl.Marker({ element: carEl }).setLngLat(animationCoords[0]).addTo(map);
+
+      map.getSource('route').setData({
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: animationCoords
+        }
+      });
+
+      map.fitBounds(turf.bbox({
+        type: 'LineString',
+        coordinates: animationCoords
+      }), { padding: 20 });
+
+      animate();
+    });
+}
+
+function animate() {
+  if (paused) return;
+  if (animationIndex < animationCoords.length) {
+    marker.setLngLat(animationCoords[animationIndex]);
+    timestampDisplay.textContent = timestamps[animationIndex];
+    animationIndex++;
+    animationFrameId = setTimeout(() => requestAnimationFrame(animate), speed);
+  }
+}
+
+function pauseAnimation() {
+  paused = true;
+  cancelAnimationFrame(animationFrameId);
+}
+
+function resumeAnimation() {
+  if (!paused) return;
+  paused = false;
+  requestAnimationFrame(animate);
+}
+
+map.on('load', async () => {
+  map.addSource('route', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: []
+      }
+    }
+  });
+
+  map.addLayer({
+    id: 'route-line',
+    type: 'line',
+    source: 'route',
+    paint: {
+      'line-color': '#007cbf',
+      'line-width': 4
+    }
+  });
+
+  await loadAvailableDays();
+daySelect.selectedIndex = 0;
+startAnimation();
+});
+</script>
+</body>
+</html>
