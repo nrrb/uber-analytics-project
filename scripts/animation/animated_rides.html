@@ -32,14 +32,14 @@
   <select id="daySelect"></select>
 
   <label for="speedRange">Animation Speed</label>
-  <input type="range" id="speedRange" min="10" max="500" step="10" value="300">
+  <input type="range" id="speedRange" min="10" max="500" step="10" value="100">
 
   <button onclick="startAnimation()">Start</button>
   <button onclick="pauseAnimation()">Pause</button>
   <button onclick="resumeAnimation()">Resume</button>
 
   <div id="status">
-    Trip #: <span id="timestampDisplay">–</span>
+    Trip <span id="timestampDisplay">–</span>
   </div>
 </div>
 
@@ -58,7 +58,7 @@ let animationCoords = [];
 let animationIndex = 0;
 let animationFrameId = null;
 let paused = false;
-let speed = 300;
+let speed = 100;
 let startEndMarkers = [];
 let timestamps = [];
 
@@ -82,8 +82,6 @@ async function loadGeoJSON(day) {
   timestamps = [];
   geojson.features.forEach((f, i) => {
     if (f.geometry.type === "LineString") {
-      const t = f.properties?.timestamp || `Trip ${i + 1}`;
-      f.geometry.coordinates.forEach(c => timestamps.push(t));
       coords.push(...f.geometry.coordinates);
     }
   });
@@ -125,7 +123,7 @@ function startAnimation() {
       timestamps = [];
       geojson.features.forEach((f, i) => {
         if (f.geometry.type === "LineString") {
-          const t = f.properties?.timestamp || `Trip ${i + 1}`;
+          const t = `${i + 1}`;
           f.geometry.coordinates.forEach(c => timestamps.push(t));
           coords.push(...f.geometry.coordinates);
         }
@@ -202,6 +200,9 @@ map.on('load', async () => {
   await loadAvailableDays();
 daySelect.selectedIndex = 0;
 startAnimation();
+
+// Auto-start when user changes the day manually
+daySelect.addEventListener("change", startAnimation);
 });
 </script>
 </body>
