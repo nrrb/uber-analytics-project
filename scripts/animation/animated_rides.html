@@ -60,6 +60,8 @@
     <script src="days.js"></script>
     <script>
       // Set Mapbox access token and initialize the map
+      // Per the Mapbox API Tokens docs this is meant to be public:
+      // https://docs.mapbox.com/help/getting-started/access-tokens/#public-tokens
       mapboxgl.accessToken =
         "pk.eyJ1IjoibmljaG9sYXM3NzciLCJhIjoiY202NW40cHpnMXJmODJpcHlvZHVjZDA5ZiJ9.HoZYIgpxoOkZEM7Fb9_Lsw";
       const map = new mapboxgl.Map({
@@ -125,7 +127,10 @@
         });
       }
 
-      // Starts the animation by loading the GeoJSON, initializing markers, and starting the animation loop
+      /* 
+      Starts the animation by loading the GeoJSON, 
+      initializing markers, and starting the animation loop
+      */
       function startAnimation() {
         cancelAnimationFrame(animationFrameId);
         if (marker) {
@@ -154,9 +159,9 @@
 
             if (!animationCoords.length) return;
 
-            // Create a custom marker element (car icon)
+            // Create a custom marker element of a car
             const carEl = document.createElement("div");
-            carEl.textContent = "🚗";
+            carEl.textContent = "🚙";
             carEl.style.fontSize = "24px";
             marker = new mapboxgl.Marker({ element: carEl })
               .setLngLat(animationCoords[0])
@@ -228,11 +233,10 @@
         daySelect.value = "2024-01-06";
         startAnimation();
 
-        // Restart animation when the selected day changes
+        // Restart the animation when the selected day changes
         daySelect.addEventListener("change", startAnimation);
       });
 
-      // Attach event listeners to buttons
       startButton.addEventListener("click", startAnimation);
       pauseButton.addEventListener("click", pauseAnimation);
       resumeButton.addEventListener("click", resumeAnimation);
