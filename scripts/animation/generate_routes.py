@@ -6,24 +6,25 @@ import json
 import os
 from pathlib import Path
 from collections import defaultdict
-from datetime import datetime
 import math
+from dotenv import load_dotenv
 
-# === CONFIG ===
-MAPBOX_TOKEN = "sk.eyJ1IjoibmljaG9sYXM3NzciLCJhIjoiY205ODMyN3MzMGU2OTJtcTJjcWtyZWJlNSJ9.AnFWV0t9Cfpl7XABWosHDg"  # Replace this
+load_dotenv()
+
+MAPBOX_TOKEN = os.getenv('MAPBOX_TOKEN')
 INPUT_CSV = "../../data/rides.csv"
 CACHE_FILE = "cache.json"
 OUTPUT_DIR = "output/geojson/cleaned"
 GEOCODE_BASE = "https://api.mapbox.com/geocoding/v5/mapbox.places/"
 DIRECTIONS_BASE = "https://api.mapbox.com/directions/v5/mapbox/driving/"
 MAX_RETRIES = 3
-RETRY_DELAY = 2  # seconds
+RETRY_DELAY = 2
 
 CHICAGO_LAT = 41.8781
 CHICAGO_LON = -87.6298
 MAX_MILES = 100
 
-# === INIT ===
+# Initialize cache
 Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 if os.path.exists(CACHE_FILE):
     with open(CACHE_FILE) as f:
@@ -116,51 +117,49 @@ def save_geojson(day, features):
         json.dump(geojson, f)
     print(f"[SAVED] {out_path}")
 
-# === MAIN WORK ===
-df = pd.read_csv(INPUT_CSV)
-df["ride_start"] = pd.to_datetime(df["ride_start"])
-df = df.sort_values("ride_start")
+rides_df = pd.read_csv(INPUT_CSV)
+rides_df["ride_start"] = pd.to_datetime(rides_df["ride_start"])
+rides_df = rides_df.sort_values("ride_start")
 
 # Geocode pickup and dropoff
-df["pickup_coords"] = df["pickup_address"].apply(geocode)
-df["dropoff_coords"] = df["dropoff_address"].apply(geocode)
-df = df[df["pickup_coords"].notnull() & df["dropoff_coords"].notnull()]
+rides_df["pickup_coords"] = rides_df["pickup_address"].apply(geocode)
+rides_df["dropoff_coords"] = rides_df["dropoff_address"].apply(geocode)
+rides_df = rides_df[rides_df["pickup_coords"].notnull() & rides_df["dropoff_coords"].notnull()]
 
 routes_by_day = defaultdict(list)
 
-for i in range(len(df)):
-    ride = df.iloc[i]
+for i in range(len(rides_df)):
+    ride = rides_df.iloc[i]
     ride_time = ride["ride_start"]
     if ride_time.time() < pd.to_datetime("05:00").time():
         day = (ride_time - pd.Timedelta(days=1)).date()
     else:
         day = ride_time.date()
 
-    # 1. pickup → dropoff
-    g1 = route_between(ride["pickup_coords"], ride["dropoff_coords"])
-    if g1:
+    # 1. pickup -> dropoff
+    geometry1 = route_between(ride["pickup_coords"], ride["dropoff_coords"])
+    if geometry1:
         routes_by_day[day].append({
             "type": "Feature",
-            "geometry": g1,
+            "geometry": geometry1,
             "properties": {
                 "timestamp": ride["ride_start"].isoformat()
             }
         })
 
-    # 2. dropoff → next pickup (if available)
-    if i < len(df) - 1:
-        next_ride = df.iloc[i + 1]
-        g2 = route_between(ride["dropoff_coords"], next_ride["pickup_coords"])
-        if g2:
+    # 2. dropoff -> next pickup (if available)
+    if i < len(rides_df) - 1:
+        next_ride = rides_df.iloc[i + 1]
+        geometry2 = route_between(ride["dropoff_coords"], next_ride["pickup_coords"])
+        if geometry2:
             routes_by_day[day].append({
                 "type": "Feature",
-                "geometry": g2,
+                "geometry": geometry2,
                 "properties": {
                     "timestamp": next_ride["ride_start"].isoformat()
                 }
             })
 
-# === OUTPUT ===
 for day, features in routes_by_day.items():
     save_geojson(str(day), features)
 
