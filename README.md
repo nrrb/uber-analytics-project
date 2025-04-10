@@ -162,8 +162,6 @@ A few problems:
 4. The `recognizedAt` seemed to be a UNIX timestamp indicating when the ride started, and I would have to extrapolate from that and the `formattedDuration` when the ride ended.
 5. The pickupAddress and dropOffAddress were very general (clearly for safety purposes), and the ZIP was probably the most useful part.
 
-## Cleaning The Data
-
 As with any web scraping or data processing project, I had to write a fair amount of code to clean this up and shape it into a format I needed for further analysis. I used a combination of [Pandas](https://pandas.pydata.org/) and [regular expressions](https://docs.python.org/3/library/re.html) to clean it up ([full code here](https://github.com/nrrb/uber-analytics-project/blob/main/scripts/clean_uber_data.ipynb)).
 
 ```python
