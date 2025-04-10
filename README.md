@@ -4,33 +4,33 @@ I chose control.
 
 In this post, I’ll show you how I reverse-engineered Uber’s internal APIs to scrape my driver earnings data programmatically with zero API key, how I cleaned it up to be useful for downstream data analysis, and then how I was able to derive actionable insights from that data.
 
-![Partial screenshot from my Uber Driver app showing my 4379 ride count](visualizations/readme/uber rides count.jpg)
+![Partial screenshot from my Uber Driver app showing my 4379 ride count](https://nrrb.github.io/uber-analytics-project/visualizations/readme/uber rides count.jpg)
 
 Between January 9 2023 and September 30 2024 I drove with Uber sometimes 7 days a week for a total of 4379 passenger rides. I had over 2500 rides with 5 star ratings and I averaged 4.98 stars. Being an analytical person I wanted to learn from my experience. With such a data-driven app, I thought surely there’d be a way to get my data about my driving. 
 
 However, when I looked at the [Drivers API](https://developer.uber.com/docs/drivers/introduction) on their site, I got the rude message that the API was “limited” and I had to apply for access. Seriously?! There must be another way.
 
-![The Uber Driver API showing that the access to the API is "limited"](visualizations/readme/uber developers page.jpeg)
+![The Uber Driver API showing that the access to the API is "limited"](https://nrrb.github.io/uber-analytics-project/visualizations/readme/uber developers page.jpeg)
 
 I found another page (https://drivers.uber.com/earnings/activities) that would let me look at my past rides, but frustratingly in a paginated week-by-week view. I had driven Uber for roughly 89 weeks, and with 15 results per page I’d be clicking at least 400 times just to list my rides. I thought there had to be a way around this. 
 
-![Paginating through my rides week by week, 15 results at a time](visualizations/readme/Uber Drivers Page - Pagination - 25.gif)
+![Paginating through my rides week by week, 15 results at a time](https://nrrb.github.io/uber-analytics-project/visualizations/readme/Uber Drivers Page - Pagination - 25.gif)
 
 ## Hacking The Data
 
 I opened the Google Chrome Developer Tools, went to the Network tab, and refreshed the page on a week that had ride data. I was looking for a request that was providing the data for the listing of rides. 
 
-![Finding the network request for the rides data in the Google Chrome Developer Tools](visualizations/readme/Uber Drivers Page - Dev Tools Network Activity 50.gif)
+![Finding the network request for the rides data in the Google Chrome Developer Tools](https://nrrb.github.io/uber-analytics-project/visualizations/readme/Uber Drivers Page - Dev Tools Network Activity 50.gif)
 
 I found it! The request was being made to `https://drivers.uber.com/earnings/api/getWebActivityFeed?localeCode=en` with some request parameters in a POST header, and I was getting back a JSON response with details far richer than what was being displayed in the browser. The pagination flags were easy to find at the end of the JSON response. My task then was to replicate this request programmatically in Python, my language of choice for web scraping. 
 
 To make things easier for myself, I leaned on [Postman](https://www.postman.com/)’s code generation capabilities. I first had to copy this Uber API request over from Google Chrome to Postman and replicate it there. There was surely going to be some authentication built in to the request, and instead of monkeying around with manually re-creating that I just used Google Chrome Dev Tool’s “Copy > Copy as cURL” on the request in the Network tab:
 
-![Showing the Copy > Copy as cURL menu option in the Google Chrome Developer Tools under the Network tab, in the context menu for a single request](visualizations/readme/copy as curl.jpg)
+![Showing the Copy > Copy as cURL menu option in the Google Chrome Developer Tools under the Network tab, in the context menu for a single request](https://nrrb.github.io/uber-analytics-project/visualizations/readme/copy as curl.jpg)
 
 This copies to the clipboard a full cURL command with all parameters needed to replicate this on the command line. Postman can [import a cURL command](https://learning.postman.com/docs/getting-started/importing-and-exporting/importing-curl-commands/) and generate the request in its UI:
 
-![Showing how to import a request from cURL in Postman](visualizations/readme/Postman - Import cURL 25.gif)
+![Showing how to import a request from cURL in Postman](https://nrrb.github.io/uber-analytics-project/visualizations/readme/Postman - Import cURL 25.gif)
 
 Wow! I was able to transfer the request to Postman, got it to work there, and it generated some Python code using the [requests](https://requests.readthedocs.io/en/latest/) library that I could easily copy over to my code editor and continue to work on there. 
 
@@ -268,7 +268,7 @@ UberX,TRIP,COMPLETED,3.0,3.75,713,1.5,"W Belmont Ave, Chicago, IL 60657-4511, US
 ## Insights
 
 
-![Folium Heatmap of the Chicago area showing which ZIP codes I picked up from or dropped off to](visualizations/chicago_map_60160.jpg)
+![Folium Heatmap of the Chicago area showing which ZIP codes I picked up from or dropped off to](https://nrrb.github.io/uber-analytics-project/visualizations/chicago_map_60160.jpg)
 
 I've been using this in many ways to look back on the time I spent driving for Uber around Chicago at all hours of the day, in all different neighborhoods, in all types of weather, on all days of the week, and picking up all ages of people (and some cats, dogs, and bunnies too 🐇). 
 
@@ -290,25 +290,25 @@ Below are the key insights. If you want to see the Python code I used to do this
 
 ### 1. What time of day should I drive to maximize tips?
 
-![A Seaborn chart of the average total tip per hour per hour of the day](visualizations/avg_tip_by_hour.jpg)
+![A Seaborn chart of the average total tip per hour per hour of the day](https://nrrb.github.io/uber-analytics-project/visualizations/avg_tip_by_hour.jpg)
 
 The best time of day overall was 1:00 - 1:59 AM with an average total tip per hour of $4.383514. 
 
 ### 2. What day of the week should I drive to maximize tips?
 
-![A Seaborn chart of the average total tip per hour per hour and day of the week](visualizations/avg_tip_by_day_7x1.jpg)
+![A Seaborn chart of the average total tip per hour per hour and day of the week](https://nrrb.github.io/uber-analytics-project/visualizations/avg_tip_by_day_7x1.jpg)
 
 The best day to drive was Saturday, with an average total tip per hour of $3.758764.
 
 ### 3. What ride type (UberX, Comfort, Pet, etc) lead to maximal tips?
 
-![A Seaborn chart of the average total tip per hour per ride type](visualizations/avg_tip_by_ride_type.jpg)
+![A Seaborn chart of the average total tip per hour per ride type](https://nrrb.github.io/uber-analytics-project/visualizations/avg_tip_by_ride_type.jpg)
 
 The best ride type was UberX Priority, with an average total tip per hour of $4.314286. Since this ride type is not selectable in the Uber Driver app (it comes up occasionally as an offering when driving UberX), based on the chart you can see that the next best ride type is Comfort.
 
 ### 4. What are the top 5 ZIP codes to pick up from to maximize tips?
 
-![A Seaborn chart of the average total tip per hour per ZIP code, using the top 20 zip codes by this value](visualizations/avg_tip_by_top20_zip.jpg)
+![A Seaborn chart of the average total tip per hour per ZIP code, using the top 20 zip codes by this value](https://nrrb.github.io/uber-analytics-project/visualizations/avg_tip_by_top20_zip.jpg)
 
 The top 5 ZIP codes to pick up from to maximize average total tip per hour were:
 
@@ -325,19 +325,19 @@ The top 5 ZIP codes to pick up from to maximize average total tip per hour were:
 
 To give you a little more insight into the data beyond the tips, here are some more charts again using [Seaborn](https://seaborn.pydata.org/).
 
-![Matplotlib chart of how many rides I drove per week](visualizations/Ride_Count_per_Week.png)
+![Matplotlib chart of how many rides I drove per week](https://nrrb.github.io/uber-analytics-project/visualizations/Ride_Count_per_Week.png)
 
-![Matplotlib chart showing how many rides I drove per day of the week](visualizations/Ride_Count_by_Day_of_Week.png)
+![Matplotlib chart showing how many rides I drove per day of the week](https://nrrb.github.io/uber-analytics-project/visualizations/Ride_Count_by_Day_of_Week.png)
 
-![Matplotlib chart showing how many rides I drove per hour of the day](visualizations/Ride_Count_by_Hour.png)
+![Matplotlib chart showing how many rides I drove per hour of the day](https://nrrb.github.io/uber-analytics-project/visualizations/Ride_Count_by_Hour.png)
 
-![Matplotlib chart showing how many rides I drove per Uber ride type](visualizations/Uber_Rides_by_Type.png)
+![Matplotlib chart showing how many rides I drove per Uber ride type](https://nrrb.github.io/uber-analytics-project/visualizations/Uber_Rides_by_Type.png)
 
-![Matplotlib chart showing average trips and earnings per hour of the day](visualizations/AvgTrips_vs_Earnings_per_hour.png)
+![Matplotlib chart showing average trips and earnings per hour of the day](https://nrrb.github.io/uber-analytics-project/visualizations/AvgTrips_vs_Earnings_per_hour.png)
 
-![Matplotlib chart showing average trips and tips per hour of the day](visualizations/AvgTrips_vs_Tips_per_hour.png)
+![Matplotlib chart showing average trips and tips per hour of the day](https://nrrb.github.io/uber-analytics-project/visualizations/AvgTrips_vs_Tips_per_hour.png)
 
-![Matplotlib 2x2 scatter plot showing relationship between earnings/tips and distance/duration](visualizations/Earnings_Tips_vs_Distance_Duration.png)
+![Matplotlib 2x2 scatter plot showing relationship between earnings/tips and distance/duration](https://nrrb.github.io/uber-analytics-project/visualizations/Earnings_Tips_vs_Distance_Duration.png)
 
 P.S. - The code I used to generate that heatmap up there was with [Folium](https://python-visualization.github.io/folium/latest/) using this script: [Zip Code Heatmap](https://github.com/nrrb/uber-analytics-project/blob/main/notebooks/ZIP%20Code%20Heatmap.ipynb)
 
