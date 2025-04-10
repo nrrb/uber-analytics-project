@@ -4,33 +4,33 @@ I chose control.
 
 In this post, I’ll show you how I reverse-engineered Uber’s internal APIs to scrape my driver earnings data programmatically with zero API key, how I cleaned it up to be useful for downstream data analysis, and then how I was able to derive actionable insights from that data.
 
-![Partial screenshot from my Uber Driver app showing my 4379 ride count](./visualizations/readme/uber rides count.jpg)
+![Partial screenshot from my Uber Driver app showing my 4379 ride count](./visualizations/readme/uber_rides_count.jpg)
 
 Between January 9 2023 and September 30 2024 I drove with Uber sometimes 7 days a week for a total of 4379 passenger rides. I had over 2500 rides with 5 star ratings and I averaged 4.98 stars. Being an analytical person I wanted to learn from my experience. With such a data-driven app, I thought surely there’d be a way to get my data about my driving. 
 
 However, when I looked at the [Drivers API](https://developer.uber.com/docs/drivers/introduction) on their site, I got the rude message that the API was “limited” and I had to apply for access. Seriously?! There must be another way.
 
-![The Uber Driver API showing that the access to the API is "limited"](./visualizations/readme/uber developers page.jpeg)
+![The Uber Driver API showing that the access to the API is "limited"](./visualizations/readme/uber_developers_page.jpeg)
 
 I found another page (https://drivers.uber.com/earnings/activities) that would let me look at my past rides, but frustratingly in a paginated week-by-week view. I had driven Uber for roughly 89 weeks, and with 15 results per page I’d be clicking at least 400 times just to list my rides. I thought there had to be a way around this. 
 
-![Paginating through my rides week by week, 15 results at a time](./visualizations/readme/Uber Drivers Page - Pagination - 25.gif)
+![Paginating through my rides week by week, 15 results at a time](./visualizations/readme/Uber_Drivers_Page-Pagination.gif)
 
 ## Hacking The Data
 
 I opened the Google Chrome Developer Tools, went to the Network tab, and refreshed the page on a week that had ride data. I was looking for a request that was providing the data for the listing of rides. 
 
-![Finding the network request for the rides data in the Google Chrome Developer Tools](./visualizations/readme/Uber Drivers Page - Dev Tools Network Activity 50.gif)
+![Finding the network request for the rides data in the Google Chrome Developer Tools](./visualizations/readme/Uber_Drivers_Page-Dev_Tools_Network_Activity.gif)
 
 I found it! The request was being made to `https://drivers.uber.com/earnings/api/getWebActivityFeed?localeCode=en` with some request parameters in a POST header, and I was getting back a JSON response with details far richer than what was being displayed in the browser. The pagination flags were easy to find at the end of the JSON response. My task then was to replicate this request programmatically in Python, my language of choice for web scraping. 
 
 To make things easier for myself, I leaned on [Postman](https://www.postman.com/)’s code generation capabilities. I first had to copy this Uber API request over from Google Chrome to Postman and replicate it there. There was surely going to be some authentication built in to the request, and instead of monkeying around with manually re-creating that I just used Google Chrome Dev Tool’s “Copy > Copy as cURL” on the request in the Network tab:
 
-![Showing the Copy > Copy as cURL menu option in the Google Chrome Developer Tools under the Network tab, in the context menu for a single request](./visualizations/readme/copy as curl.jpg)
+![Showing the Copy > Copy as cURL menu option in the Google Chrome Developer Tools under the Network tab, in the context menu for a single request](./visualizations/readme/copy_as_curl.jpg)
 
 This copies to the clipboard a full cURL command with all parameters needed to replicate this on the command line. Postman can [import a cURL command](https://learning.postman.com/docs/getting-started/importing-and-exporting/importing-curl-commands/) and generate the request in its UI:
 
-![Showing how to import a request from cURL in Postman](./visualizations/readme/Postman - Import cURL 25.gif)
+![Showing how to import a request from cURL in Postman](./visualizations/readme/Postman-Import_cURL.gif)
 
 Wow! I was able to transfer the request to Postman, got it to work there, and it generated some Python code using the [requests](https://requests.readthedocs.io/en/latest/) library that I could easily copy over to my code editor and continue to work on there. 
 
