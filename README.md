@@ -1,3 +1,7 @@
+# How I Hacked Uber’s Hidden API to Download 4379 Rides
+
+![Cover image showing a Subaru Ascent with an UBER sign on its side, a robot arm suggesting extraction of data, and a data visualization chart featured in this article](./visualizations/readme/Hacking_Uber_API_Cover_Image.jpeg)
+
 When companies build walls around your own data, you have two choices: wait and hope, or take control.
 
 I chose control.
