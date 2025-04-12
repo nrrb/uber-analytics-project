@@ -150,7 +150,7 @@
               if (f.geometry.type === "LineString") {
                 const line = turf.lineString(f.geometry.coordinates);
                 const length = turf.length(line, { units: "miles" });
-                const spacing = 0.01; // 52.8 feet
+                const spacing = 0.1; // 528 feet
                 const t = `${i + 1}`;
             
                 for (let dist = 0; dist <= length; dist += spacing) {
