@@ -146,13 +146,18 @@
             addStartEndMarkers(geojson);
             const coords = [];
             timestamps = [];
-            geojson.features.forEach((feature, index) => {
-              if (feature.geometry.type === "LineString") {
-                const timeStamp = `${index + 1}`;
-                feature.geometry.coordinates.forEach(() => {
-                  timestamps.push(timeStamp);
-                });
-                coords.push(...feature.geometry.coordinates);
+            geojson.features.forEach((f, i) => {
+              if (f.geometry.type === "LineString") {
+                const line = turf.lineString(f.geometry.coordinates);
+                const length = turf.length(line, { units: "miles" });
+                const spacing = 0.01; // 52.8 feet
+                const t = `${i + 1}`;
+            
+                for (let dist = 0; dist <= length; dist += spacing) {
+                  const point = turf.along(line, dist, { units: "miles" });
+                  coords.push(point.geometry.coordinates);
+                  timestamps.push(t);
+                }
               }
             });
             animationCoords = coords;
