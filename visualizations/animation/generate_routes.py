@@ -144,7 +144,18 @@ for i in range(len(rides_df)):
             "geometry": geometry1,
             "properties": {
                 "timestamp": ride["ride_start"].isoformat(),
-                "type": "ride"
+                "type": "ride",
+                "rideType": ride["ride_type"],
+                "pickupAddress": ride["pickup_address"],
+                "dropoffAddress": ride["dropoff_address"],
+                "basePay": f"{float(ride['base_pay']):.2f}",
+                "surge": f"{float(ride['surge']):.2f}",
+                "tip": f"{float(ride['tip']):.2f}",
+                "earnings": f"{float(ride['earnings']):.2f}",
+                "duration": f"{int(ride['duration'])}",
+                "distance": f"{float(ride['distance']):.2f}",
+                "rideStartTime": ride['ride_start'].strftime("%B %d, %Y at %I:%M %p"),
+                "rideEndTime": pd.to_datetime(ride['ride_end']).strftime("%B %d, %Y at %I:%M %p")
             }
         })
 
