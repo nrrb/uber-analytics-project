@@ -141,6 +141,11 @@
 
       // Returns HTML description for a feature.
       function getDescription(feature) {
+        const tipValue = parseFloat(feature.properties.tip);
+        // If tip is non-zero, set background to light green; otherwise, no extra background.
+        const bgStyleTip = tipValue > 0 ? 'background-color: lightgreen;' : '';
+        const surgeValue = parseFloat(feature.properties.surge);
+        const bgStyleSurge = surgeValue > 0 ? 'background-color: lightorange;' : '';
         return `
           <div class="popup-content">
             <h3>${feature.properties.rideType}</h3>
@@ -148,8 +153,8 @@
             <p><strong><span class="popup-icon">🚩</span>Dropoff:</strong> ${feature.properties.dropoffAddress}</p>
             <hr>
             <p><strong><span class="popup-icon">💵</span>Base Pay:</strong> $${feature.properties.basePay}</p>
-            <p><strong><span class="popup-icon">⚡</span>Surge:</strong> $${feature.properties.surge}</p>
-            <p><strong><span class="popup-icon">🤝</span>Tip:</strong> $${feature.properties.tip}</p>
+            <p style="${bgStyleSurge}"><strong><span class="popup-icon">⚡</span>Surge:</strong> $${feature.properties.surge}</p>
+            <p style="${bgStyleTip}"><strong><span class="popup-icon">🤝</span>Tip:</strong> $${feature.properties.tip}</p>
             <p><strong><span class="popup-icon">💰</span>Earnings:</strong> $${feature.properties.earnings}</p>
             <hr>
             <p><strong><span class="popup-icon">📏</span>Distance:</strong> ${feature.properties.distance} miles</p>
