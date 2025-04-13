@@ -27,6 +27,19 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         font-family: sans-serif;
       }
+
+      #descriptionDisplay {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        z-index: 1;
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        font-family: sans-serif;        
+      }
+
       label,
       select {
         display: block;
@@ -37,6 +50,36 @@
         margin-top: 10px;
         font-weight: bold;
         font-size: 14px;
+      }
+      .popup-content {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        max-width: 300px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        border-radius: 4px;
+      }
+      .popup-content h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      .popup-content p {
+        margin: 4px 0;
+        font-size: 14px;
+        line-height: 1.3;
+      }
+      .popup-content hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 8px 0;
+      }
+      .popup-content strong {
+        color: #555;
+      }
+      /* Optional: style for the icons */
+      .popup-icon {
+        margin-right: 4px;
       }
     </style>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
@@ -56,12 +99,11 @@
         Trip <span id="rideNumberDisplay">–</span>
       </div>
     </div>
+    <div id="descriptionDisplay"></div>
 
     <script src="days.js"></script>
     <script>
       // Set Mapbox access token and initialize the map
-      // Per the Mapbox API Tokens docs this is meant to be public:
-      // https://docs.mapbox.com/help/getting-started/access-tokens/#public-tokens
       mapboxgl.accessToken =
         "pk.eyJ1IjoibmljaG9sYXM3NzciLCJhIjoiY202NW40cHpnMXJmODJpcHlvZHVjZDA5ZiJ9.HoZYIgpxoOkZEM7Fb9_Lsw";
       const map = new mapboxgl.Map({
@@ -71,80 +113,143 @@
         zoom: 11,
       });
 
-      // Animation variables and DOM elements
+      // Animation and marker variables
       let marker = null;
       let animationCoords = [];
       let animationIndex = 0;
       let animationFrameId = null;
       let paused = false;
-      const speed = 100;  // Constant animation delay value
+      const speed = 100;  // Delay in ms
       let startEndMarkers = [];
       let rideNumbers = [];
+      let descriptions = [];
 
       const daySelect = document.getElementById("daySelect");
       const rideNumberDisplay = document.getElementById("rideNumberDisplay");
+      const descriptionDisplay = document.getElementById("descriptionDisplay");
       const startButton = document.getElementById("startButton");
       const pauseButton = document.getElementById("pauseButton");
       const resumeButton = document.getElementById("resumeButton");
 
-      // Load available days into the select dropdown
+      // Load available days into the dropdown
       async function loadAvailableDays() {
         daySelect.innerHTML = days.map(day => `<option value="${day}">${day}</option>`).join("");
       }
 
-      // Load GeoJSON data for a given day and extract coordinates
+      function getDescription(feature) {
+        const description = `
+  <div class="popup-content">
+    <h3>${feature.properties.rideType}</h3>
+    <p><strong><span class="popup-icon">📍</span>Pickup:</strong> ${feature.properties.pickupAddress}</p>
+    <p><strong><span class="popup-icon">🚩</span>Dropoff:</strong> ${feature.properties.dropoffAddress}</p>
+    <hr>
+    <p><strong><span class="popup-icon">💵</span>Base Pay:</strong> $${feature.properties.basePay}</p>
+    <p><strong><span class="popup-icon">⚡</span>Surge:</strong> $${feature.properties.surge}</p>
+    <p><strong><span class="popup-icon">🤝</span>Tip:</strong> $${feature.properties.tip}</p>
+    <p><strong><span class="popup-icon">💰</span>Earnings:</strong> $${feature.properties.earnings}</p>
+    <hr>
+    <p><strong><span class="popup-icon">📏</span>Distance:</strong> ${feature.properties.distance} miles</p>
+    <p><strong><span class="popup-icon">⏱</span>Duration:</strong> ${feature.properties.duration} sec</p>
+    <hr>
+    <p><strong><span class="popup-icon">⏰</span>Start:</strong> ${feature.properties.rideStartTime}</p>
+    <p><strong><span class="popup-icon">🏁</span>End:</strong> ${feature.properties.rideEndTime}</p>
+  </div>
+`;
+        return description;
+      }
+
+      // Load GeoJSON for a given day (used here for retrieving route coordinates)
       async function loadGeoJSON(day) {
-        const response = await fetch(`output/geojson/cleaned/${day}.geojson`);
+        const url = `output/geojson/cleaned/${day}.geojson?t=${timestamp}`;
+        const response = await fetch(url);
         const geojson = await response.json();
         const coords = [];
         rideNumbers = [];
+        descriptions = [];
         geojson.features.forEach(feature => {
           if (feature.geometry.type === "LineString") {
             coords.push(...feature.geometry.coordinates);
           }
         });
-        return coords;
+        return { geojson, coords };
       }
 
-      // Add markers for the start and end points of each route
+      // Add start/end markers for rides (only for features with type 'ride')
       function addStartEndMarkers(geojson) {
-        startEndMarkers.forEach(marker => marker.remove());
+        // Remove any existing markers
+        startEndMarkers.forEach(m => m.remove());
         startEndMarkers = [];
 
         geojson.features.forEach(feature => {
-          if (feature.geometry.type === "LineString") {
+          if (feature.geometry.type === "LineString" && feature.properties.type === "ride") {
             const coords = feature.geometry.coordinates;
-            const geometryType = feature.properties.type;
-            if (coords.length >= 2 && geometryType == 'ride') {
+            if (coords.length < 2) return;
 
-              const startEl = document.createElement('div');
-              startEl.textContent = '🟢';
-              startEl.style.fontSize = '20px';
-              const startMarker = new mapboxgl.Marker({ element: startEl })
+            // Create start marker (green dot with a person icon)
+            const startEl = document.createElement('div');
+            startEl.textContent = '🟢';
+            startEl.style.fontSize = '20px';
+
+            // Attach hover events to show a popup with ride information
+            startEl.addEventListener('mouseenter', () => {
+              const description = getDescription(feature);              
+
+              const popup = new mapboxgl.Popup({
+                  closeButton: false,
+                  closeOnClick: false
+                })
                 .setLngLat(coords[0])
+                .setHTML(description)
                 .addTo(map);
+              startEl._popup = popup;
+            });
+            startEl.addEventListener('mouseleave', () => {
+              if (startEl._popup) {
+                startEl._popup.remove();
+                startEl._popup = null;
+              }
+            });
+            const startMarker = new mapboxgl.Marker({ element: startEl })
+              .setLngLat(coords[0])
+              .addTo(map);
 
-              const endEl = document.createElement('div');
-              endEl.textContent = '🛑';
-              endEl.style.fontSize = '20px';                
-              const endMarker = new mapboxgl.Marker({ element: endEl })
+            // Create end marker (red dot)
+            const endEl = document.createElement('div');
+            endEl.textContent = '🛑';
+            endEl.style.fontSize = '20px';
+
+            // Attach hover events for the end marker too
+            endEl.addEventListener('mouseenter', () => {
+              const description = getDescription(feature);
+
+              const popup = new mapboxgl.Popup({
+                  closeButton: false,
+                  closeOnClick: false
+                })
                 .setLngLat(coords[coords.length - 1])
+                .setHTML(description)
                 .addTo(map);
-              startEndMarkers.push(startMarker, endMarker);
-            }
+              endEl._popup = popup;
+            });
+            endEl.addEventListener('mouseleave', () => {
+              if (endEl._popup) {
+                endEl._popup.remove();
+                endEl._popup = null;
+              }
+            });
+            const endMarker = new mapboxgl.Marker({ element: endEl })
+              .setLngLat(coords[coords.length - 1])
+              .addTo(map);
+
+            startEndMarkers.push(startMarker, endMarker);
           }
         });
       }
 
-      /* 
-      Starts the animation by loading the GeoJSON, 
-      initializing markers, and starting the animation loop
-      */
+      // Start the animation: load data, add markers, and animate the car marker
       function startAnimation() {
         cancelAnimationFrame(animationFrameId);
-        if (marker) {
-          marker.remove();
-        }
+        if (marker) { marker.remove(); }
         animationIndex = 0;
         paused = false;
         const selectedDay = daySelect.value;
@@ -152,23 +257,31 @@
         fetch(`output/geojson/${selectedDay}.geojson`)
           .then(response => response.json())
           .then(geojson => {
+            // Add start/end markers with popups for rides
             addStartEndMarkers(geojson);
             const coords = [];
             rideNumbers = [];
-            geojson.features.forEach((f, i) => {
-              if (f.geometry.type === "LineString") {
-                  const t = `${i + 1}`;
-                  f.geometry.coordinates.forEach(c => {
-                    coords.push(c);
-                    rideNumbers.push(t);
-                  });
-                }
+            geojson.features.forEach((feature, i) => {
+              if (feature.geometry.type === "LineString") {
+                const rideNum = `${i + 1}`;
+                let description;
+                if (feature.properties.type == "ride") {
+                    description = getDescription(feature);
+                  } else if (feature.properties.type == "transition") {
+                    description = '<strong>Racing to my next ride! 🏎️</strong>';
+                  }
+                feature.geometry.coordinates.forEach(c => {
+                  coords.push(c);
+                  rideNumbers.push(rideNum);
+                  descriptions.push(description);
+                });
+              }
             });
             animationCoords = coords;
 
             if (!animationCoords.length) return;
 
-            // Create a custom marker element of a car
+            // Create the animated marker (a car)
             const carEl = document.createElement("div");
             carEl.textContent = "🚙";
             carEl.style.fontSize = "24px";
@@ -187,20 +300,18 @@
             };
 
             map.getSource("route").setData(routeGeoJSON);
-
-            // Adjust map view to fit the route
             map.fitBounds(turf.bbox(routeGeoJSON), { padding: 20 });
-
             animate();
           });
       }
 
-      // Recursively animate the marker along the route
+      // Animate the car marker along the route
       function animate() {
         if (paused) return;
         if (animationIndex < animationCoords.length) {
           marker.setLngLat(animationCoords[animationIndex]);
           rideNumberDisplay.textContent = rideNumbers[animationIndex];
+          descriptionDisplay.innerHTML = descriptions[animationIndex];
           animationIndex++;
           animationFrameId = setTimeout(() => requestAnimationFrame(animate), speed);
         }
@@ -231,20 +342,18 @@
         });
 
         map.addLayer({
-          id: 'route-line',
-          type: 'line',
-          source: 'route',
+          id: "route-line",
+          type: "line",
+          source: "route",
           paint: {
-            'line-color': '#000000',
-            'line-width': 4
+            "line-color": "#000000",
+            "line-width": 4
           }
         });
 
         await loadAvailableDays();
         daySelect.value = "2024-01-06";
         startAnimation();
-
-        // Restart the animation when the selected day changes
         daySelect.addEventListener("change", startAnimation);
       });
 
