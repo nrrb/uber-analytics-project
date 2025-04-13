@@ -14,7 +14,7 @@ load_dotenv()
 MAPBOX_TOKEN = os.getenv('MAPBOX_TOKEN')
 INPUT_CSV = "../../data/rides.csv"
 CACHE_FILE = "cache.json"
-OUTPUT_DIR = "output/geojson/cleaned"
+OUTPUT_DIR = "output/geojson"
 GEOCODE_BASE = "https://api.mapbox.com/geocoding/v5/mapbox.places/"
 DIRECTIONS_BASE = "https://api.mapbox.com/directions/v5/mapbox/driving/"
 MAX_RETRIES = 3
@@ -143,7 +143,8 @@ for i in range(len(rides_df)):
             "type": "Feature",
             "geometry": geometry1,
             "properties": {
-                "timestamp": ride["ride_start"].isoformat()
+                "timestamp": ride["ride_start"].isoformat(),
+                "type": "ride"
             }
         })
 
@@ -156,7 +157,8 @@ for i in range(len(rides_df)):
                 "type": "Feature",
                 "geometry": geometry2,
                 "properties": {
-                    "timestamp": next_ride["ride_start"].isoformat()
+                    "timestamp": next_ride["ride_start"].isoformat(),
+                    "type": "transition"
                 }
             })
 
