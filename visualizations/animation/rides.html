@@ -110,7 +110,7 @@
         "pk.eyJ1IjoibmljaG9sYXM3NzciLCJhIjoiY202NW40cHpnMXJmODJpcHlvZHVjZDA5ZiJ9.HoZYIgpxoOkZEM7Fb9_Lsw";
       const map = new mapboxgl.Map({
         container: "map",
-        style: "mapbox://styles/mapbox/streets-v11",
+        style: "mapbox://styles/mapbox/light-v11",
         center: [-87.65, 41.9],
         zoom: 11
       });
@@ -184,8 +184,8 @@
             let delayValue = DEFAULT_DELAY;
             if (feature.properties.type === "ride" && feature.properties.duration) {
               const durationSeconds = parseFloat(feature.properties.duration); // duration in seconds
-              // Total animation time for this feature (in ms) = (duration/100)*1000.
-              const totalTimeMs = (durationSeconds / 100) * 1000;
+              // Total animation time for this feature (in ms) = (duration/400)*1000.
+              const totalTimeMs = (durationSeconds / 400) * 1000;
               const numCoords = feature.geometry.coordinates.length;
               delayValue = totalTimeMs / numCoords;
             }
@@ -220,7 +220,7 @@
             // Create start marker (green dot).
             const startEl = document.createElement("div");
             startEl.textContent = "🟢";
-            startEl.style.fontSize = "20px";
+            startEl.style.fontSize = "16px";
             startEl.addEventListener("mouseenter", () => {
               const popup = new mapboxgl.Popup({
                 closeButton: false,
@@ -244,7 +244,7 @@
             // Create end marker (red dot).
             const endEl = document.createElement("div");
             endEl.textContent = "🛑";
-            endEl.style.fontSize = "20px";
+            endEl.style.fontSize = "16px";
             endEl.addEventListener("mouseenter", () => {
               const popup = new mapboxgl.Popup({
                 closeButton: false,
@@ -358,8 +358,10 @@
           type: "line",
           source: "route",
           paint: {
-            "line-color": "#000000",
-            "line-width": 4
+            "line-color": "#007cbf",       // A pleasant blue.
+            "line-width": 3,               // A bit thinner than 4px.
+            "line-dasharray": [1, 3],       // Creates a dashed effect.
+            "line-opacity": 0.8            // Slight transparency.
           }
         });
 
