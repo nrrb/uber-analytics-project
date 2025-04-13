@@ -2,13 +2,31 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Route Animation</title>
+    <title>Daily Uber Rides Animation | Nicholas Bennett</title>
+
+    <!-- Open Graph (OG) Meta Tags -->
+    <meta property="og:title" content="Daily Uber Rides Animation | Nicholas Bennett">
+    <meta property="og:description" content="An animation of my daily Uber rides in Chicago 2023-2024.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nrrb.github.io/uber-analytics-project/visualizations/animation/rides.html">
+    <meta property="og:image" content="https://nrrb.github.io/uber-analytics-project/visualizations/animation/assets/images/thumbnail.jpg">  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Daily Uber Rides Animation | Nicholas Bennett">
+    <meta name="twitter:description" content="An animation of my daily Uber rides in Chicago 2023-2024.">
+
+    <!-- Favicon metadata -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicons/favicon-16x16.png">
+    <link rel="manifest" href="/assets/favicons/site.webmanifest">
+      
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <style>
       body {
         margin: 0;
         padding: 0;
+        font-family: "Helvetica Neue", Arial, sans-serif;
       }
       #map {
         position: absolute;
@@ -87,6 +105,7 @@
   <body>
     <div id="map"></div>
     <div id="controls">
+      <h1>Daily Uber Rides</h1>
       <label for="daySelect">Select Day</label>
       <select id="daySelect"></select>
 
@@ -97,6 +116,8 @@
       <div id="status">
         Trip <span id="rideNumberDisplay">–</span>
       </div>
+      <hr>
+      <div>Made by <a href="https://www.linkedin.com/in/nicholasrrbennett/">Nicholas Bennett</a> and ChatGPT. (<a href="https://github.com/nrrb/uber-analytics-project/tree/main/visualizations/animation">src</a>)</div>
     </div>
     <div id="descriptionDisplay"></div>
 
