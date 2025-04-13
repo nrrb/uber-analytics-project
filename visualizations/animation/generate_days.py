@@ -1,6 +1,6 @@
 from pathlib import Path
 
-cleaned_dir = Path("output/geojson/cleaned")
+cleaned_dir = Path("output/geojson")
 geojson_files = sorted(cleaned_dir.glob("*.geojson"))
 days = [f.stem for f in geojson_files]
 
