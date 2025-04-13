@@ -53,7 +53,7 @@
       <button id="resumeButton">Resume</button>
 
       <div id="status">
-        Trip <span id="timestampDisplay">–</span>
+        Trip <span id="rideNumberDisplay">–</span>
       </div>
     </div>
 
@@ -79,10 +79,10 @@
       let paused = false;
       const speed = 100;  // Constant animation delay value
       let startEndMarkers = [];
-      let timestamps = [];
+      let rideNumbers = [];
 
       const daySelect = document.getElementById("daySelect");
-      const timestampDisplay = document.getElementById("timestampDisplay");
+      const rideNumberDisplay = document.getElementById("rideNumberDisplay");
       const startButton = document.getElementById("startButton");
       const pauseButton = document.getElementById("pauseButton");
       const resumeButton = document.getElementById("resumeButton");
@@ -97,7 +97,7 @@
         const response = await fetch(`output/geojson/cleaned/${day}.geojson`);
         const geojson = await response.json();
         const coords = [];
-        timestamps = [];
+        rideNumbers = [];
         geojson.features.forEach(feature => {
           if (feature.geometry.type === "LineString") {
             coords.push(...feature.geometry.coordinates);
@@ -145,13 +145,13 @@
           .then(geojson => {
             addStartEndMarkers(geojson);
             const coords = [];
-            timestamps = [];
+            rideNumbers = [];
             geojson.features.forEach((f, i) => {
               if (f.geometry.type === "LineString") {
                   const t = `${i + 1}`;
                   f.geometry.coordinates.forEach(c => {
                     coords.push(c);
-                    timestamps.push(t);
+                    rideNumbers.push(t);
                   });
                 }
             });
@@ -163,8 +163,8 @@
             const carEl = document.createElement("div");
             carEl.textContent = "🚙";
             carEl.style.fontSize = "24px";
-            carEl.style.transition = 'transform 0.1s linear';
-            carEl.style.willChange = 'transform';
+            carEl.style.transition = "transform 0.1s linear";
+            carEl.style.willChange = "transform";
             marker = new mapboxgl.Marker({ element: carEl })
               .setLngLat(animationCoords[0])
               .addTo(map);
@@ -191,7 +191,7 @@
         if (paused) return;
         if (animationIndex < animationCoords.length) {
           marker.setLngLat(animationCoords[animationIndex]);
-          timestampDisplay.textContent = timestamps[animationIndex];
+          rideNumberDisplay.textContent = rideNumbers[animationIndex];
           animationIndex++;
           animationFrameId = setTimeout(() => requestAnimationFrame(animate), speed);
         }
