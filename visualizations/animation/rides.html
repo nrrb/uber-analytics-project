@@ -366,8 +366,10 @@
         });
 
         await loadAvailableDays();
-        // Set a default day.
-        document.getElementById("daySelect").value = "2024-01-06";
+        // Choose a random day.
+        const randomIndex = Math.floor(Math.random() * days.length);
+        const randomDay = days[randomIndex];
+        document.getElementById("daySelect").value = randomDay;
         startAnimation();
         document.getElementById("daySelect").addEventListener("change", startAnimation);
       });
